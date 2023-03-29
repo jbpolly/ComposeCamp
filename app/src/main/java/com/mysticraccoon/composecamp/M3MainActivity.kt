@@ -3,22 +3,47 @@ package com.mysticraccoon.composecamp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Badge
+import androidx.compose.material.Icon
+import androidx.compose.material.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mysticraccoon.composecamp.ui.theme.ComposeCampTheme
 
 class M3MainActivity : ComponentActivity() {
@@ -27,70 +52,331 @@ class M3MainActivity : ComponentActivity() {
         setContent {
             ComposeCampTheme {
                 // A surface container using the 'background' color from the theme
-                MyApp(modifier = Modifier.fillMaxSize())
+                Surface(
+                    color = Color.Black,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart){
+                        CasinoBadgeComponentToggle{}
+                    }
+                }
             }
         }
     }
 }
 
+
 @Composable
-private fun MyApp(
-    modifier: Modifier = Modifier,
-    names: List<String> = listOf("World", "Compose")
+fun CasinoBadgeComponentToggle(
+    onClose: () -> Unit
 ) {
-    Column(modifier = modifier.padding(vertical = 4.dp)) {
-        for (name in names) {
-            Greeting(name = name)
-        }
+    val chipList: List<String> = listOf(
+        "All",
+        "New",
+        "Most Played"
+    )
+    var selected by remember {
+        mutableStateOf("")
     }
-}
 
-@Composable
-fun Greeting(name: String) {
+    var isExpanded by remember {
+        mutableStateOf(true)
+    }
 
-    /**
-     * State and MutableState are interfaces that hold some value and trigger UI updates (recompositions) whenever that value changes.
-     * */
-    // var expanded = false // Don't do this! Not a state. Does not trigger recomp
-    // val expanded = mutableStateOf(false) // Don't do this! Value is not remembered after recomposition. Value is reset on recomp.
-    // To preserve state across recompositions, remember the mutable state using remember.
-    val expanded = remember { mutableStateOf(false) }
-
-    // You don't need to remember extraPadding against recomposition because it's doing a simple calculation.
-    val extraPadding = if (expanded.value) 48.dp else 0.dp
-
-    Surface(
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(
+                top = 12.dp,
+                bottom = 12.dp
+            )
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()
     ) {
-        /**
-         * The weight modifier makes the element fill all available space, making it flexible,
-         * effectively pushing away the other elements that don't have a weight,
-         * which are called inflexible.
-         * It also makes the fillMaxWidth modifier redundant.
-         */
-        Row(modifier = Modifier.padding(24.dp)) {
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(bottom = extraPadding)
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .border(shape = CircleShape, width = 1.dp, color = Color.White)
+                .padding(4.dp)
+                .clickable {
+                    if (isExpanded) {
+                        isExpanded = false
+                        onClose()
+                    } else {
+                        isExpanded = true
+                    }
+                }
+        ) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.Search,
+                contentDescription = "close",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
 
+        AnimatedVisibility(visible = isExpanded) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 12.dp,
+                        bottom = 12.dp
+                    )
             ) {
-                Text(text = "Hello, ")
-                Text(text = name)
-            }
-            ElevatedButton(
-                onClick = { expanded.value = !expanded.value }
-            ) {
-                Text(if (expanded.value) "Show less" else "Show more")
+                chipList.forEach { chip ->
+                    CasinoChipToggleable(
+                        chipInfo = chip,
+                        isSelected = selected == chip,
+                        onSelectedChanged = {
+                            selected = it
+                        },
+                        iconPainter = rememberVectorPainter(image = Icons.Filled.Star),
+                        badgeNumber = 25
+                    )
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
-    ComposeCampTheme() {
-        MyApp()
+fun CasinoBadgeComponentClickable(
+    onClose: () -> Unit
+) {
+    val chipList: List<String> = listOf(
+        "All",
+        "New",
+        "Most Played"
+    )
+    var selected by remember {
+        mutableStateOf(chipList.firstOrNull().orEmpty())
+    }
+
+    var isExpanded by remember {
+        mutableStateOf(true)
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(
+                top = 12.dp,
+                bottom = 12.dp
+            )
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .border(shape = CircleShape, width = 1.dp, color = Color.White)
+                .padding(4.dp)
+                .clickable {
+                    if (isExpanded) {
+                        isExpanded = false
+                        onClose()
+                    } else {
+                        isExpanded = true
+                    }
+                }
+        ) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.Search,
+                contentDescription = "close",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        AnimatedVisibility(visible = isExpanded) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 12.dp,
+                        bottom = 12.dp
+                    )
+            ) {
+                chipList.forEach { chip ->
+                    CasinoChipClickable(
+                        chipInfo = chip,
+                        isSelected = selected == chip,
+                        onSelected = {
+                            selected = it
+                        },
+                        iconPainter = rememberVectorPainter(image = Icons.Filled.Star),
+                        badgeNumber = 25
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CasinoChipClickable(
+    chipInfo: String,
+    isSelected: Boolean,
+    onSelected: (String) -> Unit,
+    iconPainter: Painter?,
+    badgeNumber: Int?
+) {
+    val background = if (isSelected) MaterialTheme.colorScheme.primary else Color.Black
+    val borderColor = if (isSelected) Color.White else Color.White
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else Color.White
+    val badgeBackgroundColor = Color.White
+
+    Box(
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .clip(CircleShape)
+            .border(shape = CircleShape, width = 1.dp, color = borderColor)
+            .background(background)
+            .clickable {
+                onSelected(chipInfo)
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            iconPainter?.let {
+                Icon(
+                    painter = it,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Text(
+                text = chipInfo,
+                style = TextStyle(
+                    color = contentColor,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.padding(8.dp)
+            )
+            badgeNumber?.let {
+                Badge(
+                    backgroundColor = badgeBackgroundColor
+                ) {
+                    Text(
+                        text = it.toString(),
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CasinoChipToggleable(
+    chipInfo: String,
+    isSelected: Boolean,
+    onSelectedChanged: (String) -> Unit,
+    iconPainter: Painter?,
+    badgeNumber: Int?
+) {
+    val background = if (isSelected) Color.White else Color.Black
+    val borderColor = if (isSelected) Color.White else Color.White
+    val contentColor = if (isSelected) Color.Black else Color.White
+    val badgeBackgroundColor = if (isSelected) Color.Black else Color.LightGray
+
+    Box(
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .clip(CircleShape)
+            .border(shape = CircleShape, width = 1.dp, color = borderColor)
+            .background(background)
+            .toggleable(
+                value = isSelected,
+                onValueChange = {
+                    onSelectedChanged(if (isSelected) "" else chipInfo)
+                }
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            iconPainter?.let {
+                Icon(
+                    painter = it,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Text(
+                text = chipInfo,
+                style = TextStyle(
+                    color = contentColor,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.padding(8.dp)
+            )
+            badgeNumber?.let {
+                Badge(
+                    backgroundColor = badgeBackgroundColor
+                ) {
+                    Text(
+                        text = it.toString(),
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(name = "Toggleable")
+fun CasinoBadgeComponentToggleablePreview() {
+    ComposeCampTheme {
+        Surface(color = Color.Black) {
+            CasinoBadgeComponentToggle(
+                onClose = {}
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(name = "Clickable")
+fun CasinoBadgeComponentClickablePreview() {
+    ComposeCampTheme {
+        Surface(color = Color.Black) {
+            CasinoBadgeComponentClickable(
+                onClose = {}
+            )
+        }
     }
 }
