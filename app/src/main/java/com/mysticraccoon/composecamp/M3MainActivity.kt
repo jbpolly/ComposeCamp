@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -57,13 +60,75 @@ class M3MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart){
-                        CasinoBadgeComponentToggle{}
-                    }
+                  //  CrashingLazyColumn()
+//                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart){
+//                        CasinoBadgeComponentToggle{}
+//                    }
                 }
             }
         }
     }
+}
+
+
+@Composable
+fun StackPaddingBox() {
+    Box(
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .border(width = 4.dp, color = Color.Red)
+            .padding(all = 4.dp)
+            .border(width = 8.dp, color = Color.Green)
+            .padding(16.dp)
+            .border(width = 2.dp, color = Color.Blue)
+            .padding(24.dp)
+    ) {
+        Text(text = "Welcome to Compose Camp!", color = Color.Black, fontSize = 32.sp)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewStackPaddingBox() {
+    ComposeCampTheme {
+        StackPaddingBox()
+    }
+}
+
+@Composable
+fun CrashingLazyColumn() {
+
+    val parentList = listOf<String>("1", "2", "3", "4", "5")
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+        LazyColumn(){
+            items(parentList){item ->
+                CrashLazyColumnItem(item)
+            }
+        }
+    }
+
+}
+
+@Composable
+fun CrashLazyColumnItem(title: String) {
+
+    val itemList = listOf<String>("A", "B", "C", "D", "E", "F", "G", "H")
+    Text(text = title, color = Color.Green, fontSize = 24.sp)
+    // modifier = Modifier.height(200.dp)
+    Box(){
+        LazyColumn(){
+            items(itemList){item ->
+                Text(text = item, color = Color.Red, fontSize = 24.sp)
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewCrashingLazyColumn() {
+    CrashingLazyColumn()
 }
 
 
