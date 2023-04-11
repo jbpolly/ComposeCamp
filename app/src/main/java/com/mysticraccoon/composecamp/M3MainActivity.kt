@@ -7,9 +7,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Badge
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
@@ -60,10 +64,10 @@ class M3MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                  //  CrashingLazyColumn()
-//                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart){
-//                        CasinoBadgeComponentToggle{}
-//                    }
+                   // CrashingLazyColumn()
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart){
+                        CasinoBadgeComponentToggle{}
+                    }
                 }
             }
         }
@@ -73,17 +77,21 @@ class M3MainActivity : ComponentActivity() {
 
 @Composable
 fun StackPaddingBox() {
-    Box(
-        modifier = Modifier
-            .padding(all = 8.dp)
-            .border(width = 4.dp, color = Color.Red)
-            .padding(all = 4.dp)
-            .border(width = 8.dp, color = Color.Green)
-            .padding(16.dp)
-            .border(width = 2.dp, color = Color.Blue)
-            .padding(24.dp)
-    ) {
-        Text(text = "Welcome to Compose Camp!", color = Color.Black, fontSize = 32.sp)
+
+    Surface(color = Color.White) {
+        Box(
+            modifier = Modifier
+                .padding(all = 8.dp)
+                .border(width = 4.dp, color = Color.Red)
+                .padding(all = 6.dp)
+                .border(width = 8.dp, color = Color.Green)
+                .padding(16.dp)
+                .border(width = 2.dp, color = Color.Blue)
+                .padding(24.dp)
+                .background(Color.Yellow)
+        ) {
+            Text(text = "Welcome to Compose Camp!", color = Color.Black, fontSize = 32.sp)
+        }
     }
 }
 
@@ -98,11 +106,22 @@ fun PreviewStackPaddingBox() {
 @Composable
 fun CrashingLazyColumn() {
 
-    val parentList = listOf<String>("1", "2", "3", "4", "5")
+    val parentList = listOf<String>("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
-        LazyColumn(){
-            items(parentList){item ->
+
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .verticalScroll(state = rememberScrollState())
+//        ) {
+//            parentList.forEach { item ->
+//                CrashLazyColumnItem(title = item)
+//            }
+//        }
+
+        LazyColumn() {
+            items(parentList) { item ->
                 CrashLazyColumnItem(item)
             }
         }
@@ -116,13 +135,24 @@ fun CrashLazyColumnItem(title: String) {
     val itemList = listOf<String>("A", "B", "C", "D", "E", "F", "G", "H")
     Text(text = title, color = Color.Green, fontSize = 24.sp)
     // modifier = Modifier.height(200.dp)
-    Box(){
-        LazyColumn(){
-            items(itemList){item ->
-                Text(text = item, color = Color.Red, fontSize = 24.sp)
-            }
+
+//    LazyColumn(modifier = Modifier.height(200.dp)) {
+//        items(itemList) { item ->
+//            Text(text = item, color = Color.Red, fontSize = 24.sp)
+//        }
+//    }
+
+    Column(
+        modifier = Modifier
+            .height(150.dp)
+            .verticalScroll(state = rememberScrollState())
+            .fillMaxWidth()
+    ) {
+        itemList.forEach { item ->
+            Text(text = item, color = Color.Red, fontSize = 24.sp)
         }
     }
+
 }
 
 @Preview
@@ -201,6 +231,7 @@ fun CasinoBadgeComponentToggle(
                         isSelected = selected == chip,
                         onSelectedChanged = {
                             selected = it
+                            isExpanded = false
                         },
                         iconPainter = rememberVectorPainter(image = Icons.Filled.Star),
                         badgeNumber = 25
